@@ -86,6 +86,7 @@ class AuthController:
             
             user.last_login = datetime.now(timezone.utc)
             await db.flush()
+            await db.refresh(user)
             
             access_token = AuthController.create_access_token(user.id, user.role)
             
@@ -93,7 +94,7 @@ class AuthController:
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
-                "user": UserRead.model_validate(user),
+                "user": UserRead.model_validate(user, from_attributes=True),
             }
         except AuthenticationError:
             raise

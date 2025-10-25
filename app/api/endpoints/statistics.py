@@ -10,8 +10,8 @@ statistics_router = APIRouter()
 
 @statistics_router.get("/", summary="Get system-wide farm statistics")
 async def get_statistics(
+    current_user: GetCurrentUser,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(GetCurrentUser),
 ):
     try:
         return await StatisticsController.get_all_statistics(db)
