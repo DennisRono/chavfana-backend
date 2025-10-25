@@ -4,12 +4,14 @@ from uuid import UUID
 
 from chavfana.controllers.animals import AnimalController
 from chavfana.db.database import get_db
+from chavfana.dependencies.auth import GetCurrentUser
 
 animals_router = APIRouter()
 
 @animals_router.get("/{animal_id}")
 async def get_animal(
     animal_id: UUID,
+    current_user: GetCurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
     animal = await AnimalController.get_animal_by_id(db, animal_id)
@@ -20,6 +22,7 @@ async def get_animal(
 @animals_router.get("/project/{project_id}")
 async def get_animals_by_project(
     project_id: UUID,
+    current_user: GetCurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
     animals = await AnimalController.get_animals_by_project(db, project_id)
@@ -28,6 +31,7 @@ async def get_animals_by_project(
 @animals_router.get("/groups/{project_id}")
 async def get_animal_groups(
     project_id: UUID,
+    current_user: GetCurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
     groups = await AnimalController.get_animal_groups_by_project(db, project_id)
