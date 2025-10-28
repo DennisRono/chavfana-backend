@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -29,7 +29,7 @@ class AnimalGroupRead(BaseModel):
     starting_number: int
     average_weight: Optional[float]
     disease_alerts: bool
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -81,6 +81,6 @@ class AnimalRead(BaseModel):
     gender: str
     health_status: str
     is_active: bool
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

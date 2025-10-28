@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
@@ -11,6 +12,7 @@ from chavfana.schemas.project import (
     AnimalKeepingProjectRead,
     PlantingEventCreate,
     PlantingEventRead,
+    ProjectRead,
 )
 from chavfana.db.database import get_db
 
@@ -45,8 +47,15 @@ async def create_animal_keeping_project(
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    
+@projects_router.get("/", response_model=List[ProjectRead])
+async def get_all_projects(current_user: GetCurrentUser, db: AsyncSession = Depends(get_db)):
+    projects = await ProjectController.get_all_projects(db)
+    if not projects:
+        raise HTTPException(status_code=404, detail="Projects not found")
+    return [ProjectRead.model_validate(p, from_attributes=True) for p in projects]
 
-@projects_router.get("/{project_id}", response_model=PlantingProjectRead)
+@projects_router.get("/{project_id}", response_model=None)
 async def get_project(
     project_id: UUID,
     current_user: GetCurrentUser,

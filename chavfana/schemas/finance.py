@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -39,7 +39,7 @@ class InventoryItemRead(BaseModel):
     unit_cost: float
     currency: str
     reorder_level: float
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -79,6 +79,6 @@ class TransactionRead(BaseModel):
     amount: float
     currency: str
     date: date
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

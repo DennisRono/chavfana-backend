@@ -48,7 +48,7 @@ class FarmRead(BaseModel):
     area_size: float
     area_unit: str
     time_zone: str
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 

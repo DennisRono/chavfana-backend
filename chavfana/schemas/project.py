@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from chavfana.schemas.farm import FarmRead, PlotRead
+from chavfana.schemas.user import UserRead
 
 
 class ProjectCreate(BaseModel):
@@ -95,7 +98,7 @@ class PlantingEventRead(BaseModel):
     end_date: Optional[date]
     area_size: float
     stage: str
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -115,6 +118,39 @@ class AnimalKeepingProjectRead(BaseModel):
     status: str
     housing_type: Optional[str]
     carrying_capacity: Optional[int]
-    created_at: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FarmReadWithPlots(FarmRead):
+    plots: List[PlotRead] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ProjectRead(BaseModel):
+    id: uuid.UUID
+    farm_id: Optional[uuid.UUID]
+    plot_id: Optional[uuid.UUID]
+    owner_id: uuid.UUID
+    name: str
+    project_type: str = Field(..., description="PlantingProject or AnimalKeepingProject")
+    status: str
+    start_date: date
+    end_date: Optional[date]
+    notes: Optional[str]
+    created_at: datetime
+    species_id: Optional[uuid.UUID] = None
+    expected_yield: Optional[float] = None
+    yield_unit: Optional[str] = None
+    expected_revenue: Optional[float] = None
+    irrigation_type: Optional[str] = None
+    soil_analysis_id: Optional[uuid.UUID] = None
+    housing_type: Optional[str] = None
+    pasture_info: Optional[str] = None
+    carrying_capacity: Optional[int] = None
+
+    owner: Optional[UserRead] = None
+    farm: Optional[FarmReadWithPlots] = None
 
     model_config = ConfigDict(from_attributes=True)

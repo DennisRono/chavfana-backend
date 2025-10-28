@@ -3,15 +3,22 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, with_polymorphic
 
+from chavfana.models.farm import Farm
 from chavfana.models.plot import Plot
-from chavfana.models.project import Project, PlantingProject, AnimalKeepingProject, PlantingEvent
+from chavfana.models.project import (
+    Project,
+    PlantingProject,
+    AnimalKeepingProject,
+    PlantingEvent,
+)
 from chavfana.schemas.project import (
     ProjectCreate,
     PlantingProjectCreate,
     AnimalKeepingProjectCreate,
     PlantingEventCreate,
+    ProjectRead,
 )
 from chavfana.core.exceptions import NotFoundError
 
@@ -22,7 +29,9 @@ class ProjectController:
         db: AsyncSession, request_data: PlantingProjectCreate
     ) -> PlantingProject:
         if request_data.plot_id:
-            result = await db.scalars(select(Plot).where(Plot.id == request_data.plot_id))
+            result = await db.scalars(
+                select(Plot).where(Plot.id == request_data.plot_id)
+            )
             plot = result.scalar_one_or_none()
             farm_id = plot.farm_id if plot else None
 
@@ -69,7 +78,28 @@ class ProjectController:
         return project
 
     @staticmethod
-    async def get_project_by_id(db: AsyncSession, project_id: UUID) -> Optional[Project]:
+    async def get_all_projects(db: AsyncSession):
+        project_with_subclasses = with_polymorphic(
+            Project, [PlantingProject, AnimalKeepingProject]
+        )
+
+        stmt = (
+            select(project_with_subclasses)
+            .options(
+                selectinload(project_with_subclasses.owner),
+                selectinload(project_with_subclasses.farm).selectinload(Farm.plots),
+            )
+            .where(project_with_subclasses.is_deleted == False)
+        )
+
+        result = await db.execute(stmt)
+        projects = result.scalars().unique().all()
+        return projects
+
+    @staticmethod
+    async def get_project_by_id(
+        db: AsyncSession, project_id: UUID
+    ) -> Optional[Project]:
         stmt = select(Project).where(Project.id == project_id)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
