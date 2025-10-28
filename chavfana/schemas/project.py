@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
-from typing import Optional
+from datetime import date, datetime
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ProjectCreate(BaseModel):
-    farm_id: uuid.UUID
+    farm_id: Optional[uuid.UUID] = None
+    plot_id: Optional[uuid.UUID] = None
     owner_id: uuid.UUID
     name: str = Field(..., min_length=2, max_length=200)
     status: str = Field(default="Planning", max_length=50)
@@ -17,6 +18,12 @@ class ProjectCreate(BaseModel):
     notes: Optional[str] = Field(None, max_length=2048)
 
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode='after')
+    def check_one_required(self):
+        if not self.farm_id and not self.plot_id:
+            raise ValueError("At least one of 'farm_id' or 'plot_id' must be provided.")
+        return self
 
     @model_validator(mode="before")
     def validate_dates(cls, values):
@@ -41,7 +48,8 @@ class PlantingProjectCreate(ProjectCreate):
 
 class PlantingProjectRead(BaseModel):
     id: uuid.UUID
-    farm_id: uuid.UUID
+    farm_id: Optional[uuid.UUID]
+    plot_id: Optional[Union[uuid.UUID, None]]
     owner_id: uuid.UUID
     name: str
     status: str
@@ -50,7 +58,7 @@ class PlantingProjectRead(BaseModel):
     expected_yield: Optional[float]
     yield_unit: Optional[str]
     expected_revenue: Optional[float]
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 

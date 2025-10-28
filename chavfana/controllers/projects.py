@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from chavfana.models.plot import Plot
 from chavfana.models.project import Project, PlantingProject, AnimalKeepingProject, PlantingEvent
 from chavfana.schemas.project import (
     ProjectCreate,
@@ -20,8 +21,14 @@ class ProjectController:
     async def create_planting_project(
         db: AsyncSession, request_data: PlantingProjectCreate
     ) -> PlantingProject:
+        if request_data.plot_id:
+            result = await db.scalars(select(Plot).where(Plot.id == request_data.plot_id))
+            plot = result.scalar_one_or_none()
+            farm_id = plot.farm_id if plot else None
+
         project = PlantingProject(
-            farm_id=request_data.farm_id,
+            farm_id=request_data.farm_id or farm_id,
+            plot_id=request_data.plot_id or None,
             owner_id=request_data.owner_id,
             name=request_data.name,
             project_type="PlantingProject",

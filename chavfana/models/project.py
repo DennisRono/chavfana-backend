@@ -30,7 +30,13 @@ class Project(BaseModel):
     farm_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("farms.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
+        index=True,
+    )
+    plot_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plots.id", ondelete="CASCADE"),
+        nullable=True,
         index=True,
     )
     owner_id: Mapped[uuid.UUID] = mapped_column(

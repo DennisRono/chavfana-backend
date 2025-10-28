@@ -11,7 +11,7 @@ from chavfana.db.database import get_db
 farms_router = APIRouter()
 
 
-@farms_router.post("/", response_model=FarmRead)
+@farms_router.post("/", response_model=None)
 async def create_farm(
     request_data: FarmCreate,
     current_user: GetCurrentUser,
@@ -48,7 +48,7 @@ async def update_farm(
     return await FarmController.update_farm(db, farm_id, request_data)
 
 
-@farms_router.post("/plots", response_model=PlotRead)
+@farms_router.post("/plots", response_model=None)
 async def create_plot(
     request_data: PlotCreate,
     current_user: GetCurrentUser,

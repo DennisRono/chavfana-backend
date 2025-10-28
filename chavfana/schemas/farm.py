@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 import uuid
 from typing import Optional
 
@@ -91,6 +92,6 @@ class PlotRead(BaseModel):
     area_size: float
     area_unit: str
     current_crop_id: Optional[uuid.UUID]
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
