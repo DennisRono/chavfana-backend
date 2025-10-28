@@ -99,16 +99,41 @@ class ProjectController:
     @staticmethod
     async def get_project_by_id(
         db: AsyncSession, project_id: UUID
-    ) -> Optional[Project]:
-        stmt = select(Project).where(Project.id == project_id)
+    ) -> Optional[ProjectRead]:
+        project_with_subclasses = with_polymorphic(
+            Project, [PlantingProject, AnimalKeepingProject]
+        )
+
+        stmt = (
+            select(project_with_subclasses)
+            .options(
+                selectinload(project_with_subclasses.owner),
+                selectinload(project_with_subclasses.farm).selectinload(Farm.plots),
+            )
+            .where(project_with_subclasses.id == project_id)
+        )
+
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_projects_by_farm(db: AsyncSession, farm_id: UUID) -> List[Project]:
-        stmt = select(Project).where(Project.farm_id == farm_id)
+    async def get_projects_by_farm(db: AsyncSession, farm_id: UUID) -> List[ProjectRead]:
+        project_with_subclasses = with_polymorphic(
+            Project, [PlantingProject, AnimalKeepingProject]
+        )
+
+        stmt = (
+            select(project_with_subclasses)
+            .options(
+                selectinload(project_with_subclasses.owner),
+                selectinload(project_with_subclasses.farm).selectinload(Farm.plots),
+            )
+            .where(project_with_subclasses.is_deleted == False)
+            .where(project_with_subclasses.farm_id == farm_id)
+        )
+
         result = await db.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().unique().all()
 
     @staticmethod
     async def create_planting_event(

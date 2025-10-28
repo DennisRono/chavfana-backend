@@ -55,7 +55,7 @@ async def get_all_projects(current_user: GetCurrentUser, db: AsyncSession = Depe
         raise HTTPException(status_code=404, detail="Projects not found")
     return [ProjectRead.model_validate(p, from_attributes=True) for p in projects]
 
-@projects_router.get("/{project_id}", response_model=None)
+@projects_router.get("/{project_id}", response_model=ProjectRead)
 async def get_project(
     project_id: UUID,
     current_user: GetCurrentUser,
@@ -66,14 +66,16 @@ async def get_project(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project
 
-@projects_router.get("/farm/{farm_id}")
+@projects_router.get("/farm/{farm_id}", response_model=List[ProjectRead])
 async def get_projects_by_farm(
     farm_id: UUID,
     current_user: GetCurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
     projects = await ProjectController.get_projects_by_farm(db, farm_id)
-    return projects
+    if not projects:
+        raise HTTPException(status_code=404, detail="Projects not found")
+    return [ProjectRead.model_validate(p, from_attributes=True) for p in projects]
 
 @projects_router.post("/planting-events", response_model=PlantingEventRead)
 async def create_planting_event(

@@ -130,9 +130,6 @@ class FarmReadWithPlots(FarmRead):
 
 class ProjectRead(BaseModel):
     id: uuid.UUID
-    farm_id: Optional[uuid.UUID]
-    plot_id: Optional[uuid.UUID]
-    owner_id: uuid.UUID
     name: str
     project_type: str = Field(..., description="PlantingProject or AnimalKeepingProject")
     status: str

@@ -74,7 +74,7 @@ app.include_router(api_router, prefix="/api/v1")
 setup_exception_handlers(app)
 
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 async def root():
     return {
         "message": "ChavFana API",
